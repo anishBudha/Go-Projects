@@ -11,7 +11,7 @@ func main () {
 	
 	rand.Seed(time.Now().UnixNano()) // ensures different results each run.	
 	
-	// Fisher-Yates Shufflw
+	// Fisher-Yates Shuffle
 
 	for i := len(nums) - 1; i > 0; i-- {
 		j := rand.Intn(i + 1)
