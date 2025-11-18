@@ -1,0 +1,26 @@
+[ 
+  {
+    "name": "Anish",
+    "net": "million",
+    "allocated": true,
+    "allocation": 1100
+  },
+  {
+    "name": "Pri",
+    "net": "million",
+    "allocated": false,
+    "allocation": 0
+  },
+  {
+    "name": "Jester",
+    "net": "million",
+    "allocated": true,
+    "allocation": 172100
+  },
+  {
+    "name": "bliss",
+    "net": "million",
+    "allocated": true,
+    "allocation": 21100
+  }
+]
