@@ -5,7 +5,7 @@
 - Tailwind CSS for styling
 
 ### Project layout:
-
+```
 currency-converter/
 ├── README.md
 ├── backend/
@@ -22,3 +22,5 @@ currency-converter/
         ├── main.tsx
         ├── App.tsx
         └── index.css
+```
+
