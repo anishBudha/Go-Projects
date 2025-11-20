@@ -63,6 +63,57 @@ func fetchRates(base string) (*RateRespone, error) {
 	return &r, nil
 }
 
+func convertHandler(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	from := q.Get("from")
+	to := q.Get("to")
+	amountStr := q.Get("amount")
+
+	// if any of these are empty, respond with 400 Bad Request and a message
+	if from == "" || to == "" || amountStr == "" {
+		http.Error(w, "missing query parameters", http.StatusBadRequest)
+		return
+	}
+
+	// parse amountStr into numeric amount
+	var amount float64
+	_, err := fmt.Sscan(amountStr, &amount)
+	if err != nil {
+		http.Error(w, "invalid amount", http.StatusBadRequest); 
+		return
+	}
+
+	// fetch rates with base = from
+	ratesResp, err := fectRates(from)
+	if err != nil {
+		log.Printf("fetchRates error: %v\n", err)
+		http.Error(w, "failed to fetch rates", http.StatusInternalServerError)
+		return
+	}
+
+	toRate, ok := ratesResp.Rates[to]
+	if !ok {
+		http.Error(w, "target currency not found", http.StatusBadRequest)
+		return
+	}
+
+	// If API returns rates relative to base, then rate[to] is direct multiplier.
+
+	converted := amount * toRate 
+	
+	out := map[string]any {
+		"from": from,
+		"to": to,
+		"amount": amount,
+		"converted": converted,
+		"date": ratesResp.Date,
+		"rate": toRate,
+	}
+	w.Header().Set("Contect-Type", "application/json") // this is json
+	json.NewEncoder(w).Encode(out) // here is json!
+}
+
+
 func main() {
 	
 
@@ -70,6 +121,9 @@ func main() {
 
 
 }
+
+
+
 
 
 
