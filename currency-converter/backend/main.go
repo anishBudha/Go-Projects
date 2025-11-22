@@ -11,13 +11,13 @@ import (
 	"time"
 )
 
-const {
+const ( 
 
 	jsdelivrTemplate = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/latest/%s.min.json"
 	pagesDevTemplate = "https://latest.currency-api.pages.dev/v1/latest/%s.json"
 	// Note: README recommends using a fallback mechanism. See repo.  [oai_citation:1‡GitHub](https://github.com/fawazahmed0/exchange-api)
 
-}
+)
 
 
 // Go is a strongly typed language. It needs to know exactly what data looks like before it receives it.
@@ -38,9 +38,7 @@ type RatesResponse struct {
 // defer resp.Body.Close() before function finishes, make sure the connection is closed
 func fetchRates(base string) (*RatesResponse, error) {
 	
-	client := &http.CLient{
-		Timeout: 8 * time.Second
-	}
+	client := &http.Client{Timeout: 8 * time.Second}
 
 	// try primary CDN jsdelivr 
 	u := fmt.Sprintf(jsdelivrTemplate, url.PathEscape(base)) // Sprintf takes the template url and replaces the %s with the base
@@ -61,14 +59,14 @@ func fetchRates(base string) (*RatesResponse, error) {
 	// waith until fetchRates is completely finished, then run 
 	defer resp.Body.Close()
 
-	body, err := io.Readall(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err	
 	}
 
 	var r RatesResponse
 	if err := json.Unmarshal(body, &r); err != nil {
-		return nil, er
+		return nil, err
 	}
 
 	// if api omit the Base currency 
@@ -93,9 +91,9 @@ func convertHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	from := q.Get("from")
 	to := q.Get("to")
-	amoutStr := q.Get("amount")
+	amountStr := q.Get("amount")
 	if from == "" || to == "" || amountStr == "" {
-		http.Error(w, "missing query parameters", https.StatusBadRequest)
+		http.Error(w, "missing query parameters", http.StatusBadRequest)
 		return
 	}
 	
@@ -128,9 +126,31 @@ func convertHandler(w http.ResponseWriter, r *http.Request) {
 		"to":						to,
 		"amount":				amount,
 		"converted":		converted,
-		"date":					ratesRep.Date,
+		"date":					ratesResp.Date,
 		"rate":					toRate,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(out)
+}
+
+func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	http.HandleFunc("/api/convert", convertHandler)
+
+	// optionally serve frontend static in prodcution from ../frontend/dist
+
+	fs := http.FileServer(http.Dir("../frontend/dist"))
+	http.Handle("/", fs) 
+
+	srv := &http.Server {
+		Addr: ":" + port,
+		ReadTimeout: 10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+	log.Printf("backend listening on: %s", port)
+	log.Fatal(srv.ListenAndServe())
 }

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="end">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Currency Converter</title>
+  </head>
+  <body class="bg-slate-100 min-h-screen flex items-center justify-center p-6">
+    <div class="w-full max-w-md bg-white p-6 rounded-xl shadow-lg space-y-4">
+      <h1 class="text-2xl font-bold">Currency Converter</h1>
+
+      <div class="space-y-3">
+        <input
+            id="from"
+            placeholder="From (USD)"
+            class="w-full border p-2 rounded"
+        />
+
+        <input
+            id="to"
+            placeholder="To (NPR)"
+            class="w-full border p-2 rounded"
+        />
+
+        <input
+            id="amount"
+            placeholder="Amount"
+            class="w-holder border p-2 rounded"
+        />
+
+        <button
+            id="convert-btn"
+            class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        >
+          Convert
+        </button>
+
+        <div
+            id="result"
+            class="mt-4 text-center text-lg font-semibold text-slate-700"
+        ></div>
+
+        <div
+            id="error"
+            class="text-center text-red-600 font-medium"
+        ></div>
+      </div>
+    </div>
+    
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+
+
+
+
