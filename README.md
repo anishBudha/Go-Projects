@@ -1,4 +1,4 @@
-### This repo consists of 100 projects in Go, I will be/ have done in the process of learning a programming languge (Golang).
+### This repo consists of 100 projects in Go, I will be/ have doing/done in the process of learning a programming languge (Golang).
 
 Here are the projects to be / done:
 
