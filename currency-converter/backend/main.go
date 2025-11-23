@@ -8,13 +8,14 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
 const ( 
 
-	jsdelivrTemplate = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/latest/%s.min.json"
-	pagesDevTemplate = "https://latest.currency-api.pages.dev/v1/latest/%s.json"
+	jsdelivrTemplate = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/%s.json"
+	pagesDevTemplate = "https://latest.currency-api.pages.dev/v1/currencies/%s.json"
 	// Note: README recommends using a fallback mechanism. See repo.  [oai_citation:1‡GitHub](https://github.com/fawazahmed0/exchange-api)
 
 )
@@ -40,20 +41,35 @@ func fetchRates(base string) (*RatesResponse, error) {
 	
 	client := &http.Client{Timeout: 8 * time.Second}
 
+	// API requires lowercase currency codes
+	baseLower := strings.ToLower(base)
+
 	// try primary CDN jsdelivr 
-	u := fmt.Sprintf(jsdelivrTemplate, url.PathEscape(base)) // Sprintf takes the template url and replaces the %s with the base
-	resp, err := client.Get(u)
+	primaryURL := fmt.Sprintf(jsdelivrTemplate, url.PathEscape(baseLower)) // Sprintf takes the template url and replaces the %s with the base
+	resp, err := client.Get(primaryURL)
+	var primaryErr error
 
-	if err != nil || resp.StatusCode != http.StatusOK {
-		// attempt fallback to pages.dev 
+	if err != nil {
+		primaryErr = fmt.Errorf("primary API request failed: %w", err)
+	} else if resp.StatusCode != http.StatusOK {
+		primaryErr = fmt.Errorf("primary API returned status %d", resp.StatusCode)
 		if resp != nil {
-		resp.Body.Close() // close the connection
+			resp.Body.Close()
 		}
+	}
 
-		u = fmt.Sprintf(pagesDevTemplate, url.PathEscape(base))
-		resp, err = client.Get(u)
+	if primaryErr != nil {
+		// attempt fallback to pages.dev 
+		fallbackURL := fmt.Sprintf(pagesDevTemplate, url.PathEscape(baseLower))
+		resp, err = client.Get(fallbackURL)
 		if err != nil {
-			return nil, err 
+			return nil, fmt.Errorf("failed to fetch rates for currency '%s': primary error (%v), fallback error: %w", base, primaryErr, err)
+		}
+		
+		// check fallback response status code
+		if resp.StatusCode != http.StatusOK {
+			resp.Body.Close()
+			return nil, fmt.Errorf("failed to fetch rates for currency '%s': primary error (%v), fallback returned status %d (URL: %s)", base, primaryErr, resp.StatusCode, fallbackURL)
 		}
 	}
 	// waith until fetchRates is completely finished, then run 
@@ -61,19 +77,45 @@ func fetchRates(base string) (*RatesResponse, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err	
+		return nil, fmt.Errorf("failed to read response body for currency '%s': %w", base, err)
+	}
+	
+	// check if body is empty
+	if len(body) == 0 {
+		return nil, fmt.Errorf("received empty response from API for currency '%s'", base)
 	}
 
-	var r RatesResponse
-	if err := json.Unmarshal(body, &r); err != nil {
-		return nil, err
+	// New API format: {"date": "...", "{currency}": {...rates...}}
+	var rawData map[string]interface{}
+	if err := json.Unmarshal(body, &rawData); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON response for currency '%s': %w", base, err)
 	}
 
-	// if api omit the Base currency 
-	if r.Base == "" {
-		r.Base = base
+	// Extract date
+	date, ok := rawData["date"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing or invalid date field in response for currency '%s'", base)
 	}
-	return &r, nil 
+
+	// Extract rates from the currency key (e.g., "usd", "eur")
+	ratesMap, ok := rawData[baseLower].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("missing or invalid rates data for currency '%s'", base)
+	}
+
+	// Convert rates to map[string]float64
+	rates := make(map[string]float64)
+	for key, value := range ratesMap {
+		if rate, ok := value.(float64); ok {
+			rates[key] = rate
+		}
+	}
+
+	return &RatesResponse{
+		Date:  date,
+		Rates: rates,
+		Base:  base,
+	}, nil
 }
 
 
@@ -113,9 +155,12 @@ func convertHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	toRate, ok := ratesResp.Rates[to]
+	// API returns currency codes in lowercase, so convert to lowercase for lookup
+	toLower := strings.ToLower(to)
+	toRate, ok := ratesResp.Rates[toLower]
 	if !ok {
 		http.Error(w, "target currency not found", http.StatusBadRequest)
+		return
 	}
 
 	// if API returns rates relative to base, then rate[to] is direct multiplier
