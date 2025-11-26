@@ -1,4 +1,5 @@
 ### Learning Goals
+
 - Go - HTTP servers, structs, mutexes, JSON handling
 - TypeScript - async/await, fetch API, DOM manipulation
 - TailwindCSS
@@ -17,9 +18,11 @@ STOP_WATCH/
 │   └── index.html      # HTML with TailwindCSS classes explained
 └── README.md
 ```
+
 ### Key Concepts
 
 ### Backend (Go)
+
 - Structs: Grouping related data
 - Mutex: Preventing race conditions
 - HTTP Handlers: Responding to web requests
@@ -27,14 +30,22 @@ STOP_WATCH/
 - CORS: Allowing frontend to access backend
 
 ### Frontend (TypeScript)
+
 - async/await: Handling asynchronous operations
 - fetch API: Making HTTP requests
 - DOM manipulation: Changing HTTP elements
 - setInterval: Repeating actions properly
 - Event listenersL Responding to user clicks
 
-### API endpoints 
+### API endpoints
+
 - `GET /api/timer` - Get current timer status
 - `Get /api/timer/start` - Start the timer
 - `POST /api/timer/stop` - Stop the timer
 - `POST /api/timer/reset` - Reset to 00:00.000
+
+### Screenshots
+
+![empty-state-reset](frontend/public/sc-1.png)
+![post-start](frontend/public/sc-2.png)
+![post-stop](frontend/public/sc-3.png)
