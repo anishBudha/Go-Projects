@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2017", 
+    "outDir": "./static",
+    "lib": ["ES2017", "DOM"],
+    "strict": true,
+    "module": "ESNext", 
+    "moduleResolution": "bundler",
+    "removeComments": true,
+    "sourceMap": false
+  }, 
+  "include": ["static/**/*.ts"], 
+  "exclude": ["node_modules"]
+}

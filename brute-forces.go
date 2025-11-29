@@ -17,7 +17,7 @@ func permute(words []string, start int, result *[][]string) {
 		return
 	}
 
-	for i := start; i<len(words); i++ {
+	for i := start; i < len(words); i++ {
 		words[start], words[i] = words[i], words[start]
 		permute(words, start+1, result)
 		words[start], words[i] = words[i], words[start]
@@ -37,7 +37,7 @@ func tryPassword(dmgPath, password string) bool {
 	return false
 }
 
-func main () {
+func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Printf("Enter path to the DMG file: ")
