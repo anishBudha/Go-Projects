@@ -1,8 +1,8 @@
  const API_URL = "http://localhost:8080/api/counter";
 
- const counterDisplay = document.getElementById("convert") as HTMLElement;
- const incrementBtn = document.getElementById("incrementBtn") as HTMLElement;
- const decrementBtn = document.getElementById("decrementBtn") as HTMLElement;
+ const counterDisplay = document.getElementById("counter") as HTMLElement;
+ const incrementBtn = document.getElementById("incrementBtn") as HTMLButtonElement;
+ const decrementBtn = document.getElementById("decrementBtn") as HTMLButtonElement;
  const statusDisplay = document.getElementById("status") as HTMLElement;
 
  async function fetchCounter(): Promise<void> {
@@ -25,7 +25,7 @@
      decrementBtn.disabled = true;
 
      const response = await fetch(`${API_URL}/increment`, {
-       method:"POST", 
+       method: "POST", 
      });
 
      const data = await response.json();
@@ -38,7 +38,7 @@
      }, 200);
    } catch (error) {
      console.error("Error incrementing counter:", error);
-     statusDisplay.textContent = "Error updating counter";
+     statusDisplay.textContent = "Error updating counter increment";
    } finally {
      incrementBtn.disabled = false;
      decrementBtn.disabled = false;
@@ -51,11 +51,11 @@
      decrementBtn.disabled = true;
 
      const response = await fetch(`${API_URL}/decrement`, {
-       method:"POST"
+       method: "POST",
      });
 
-     const data = await response.json()
-
+     const data = await response.json();
+ 
      counterDisplay.textContent = data.count.toString();
 
      counterDisplay.style.transform = "scale(1.1)";
@@ -64,7 +64,7 @@
      }, 200);
    } catch (error) {
      console.error("Error decrementing counter:", error);
-     statusDisplay.textContent = "Error updating counter";
+     statusDisplay.textContent = "Error updating counter decrement";
    } finally {
      incrementBtn.disabled = false;
      decrementBtn.disabled = false;
