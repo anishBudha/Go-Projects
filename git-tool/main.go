@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"os"
+	"bufio"
 )
 
 func getGitStatus() (string, []string){
@@ -51,10 +53,8 @@ func gitAddAll() string {
 
 	if err != nil {
 		fmt.Println("error", err)
-	} else {
 		fmt.Println(output)
 	}
-
 	addMessage := "Added all files successfully."
 	return addMessage
 }
@@ -66,10 +66,11 @@ func gitCommit() string {
 	if err != nil {
 		fmt.Println("error", err)
 	} else {
-		fmt.Println(output)
+		lines := strings.Split(string(output), "\n")
+		fmt.Println(lines)
 	}
 
-	commitSuccess := "commit all files successfully"
+	commitSuccess := "Commited all files successfully"
 	return commitSuccess
 }
 
@@ -79,30 +80,57 @@ func gitPush() string {
 	if err != nil {
 		fmt.Println("error", err)
 	} else {
-		fmt.Println(output)
+		lines := strings.Split(string(output), "\n")
+		fmt.Println(lines)
 	}
 
 	pushMessage := "Files pushed successfully."
 	return pushMessage
 }
 
+func cont() string {
+	fmt.Println("Would you like to continue? 1 to continue, 0 to abort")
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	input := scanner.Text()
+	return input
+}
 
 func main () {
 	
 	branch, untracked := getGitStatus()
 	fmt.Println("Branch:", branch)
+	fmt.Println("length of untracked:", len(untracked))
 	fmt.Println("Untracked files:")
 	for _, file := range untracked {
 		fmt.Println(file)
 	}
 
-	addMsg := gitAddAll()
-	fmt.Println(addMsg)
 
-	commitMsg := gitCommit()
-	fmt.Println(commitMsg)
+	if untracked != nil {
+		fmt.Println("Untracked files:")
+		for _, file := range untracked {
+			fmt.Println(file)
+		}
 
-	pushMsg := gitPush()
-	fmt.Println(pushMsg)
+		input := cont()
 
+		if input == "1" {
+			addMsg := gitAddAll()
+			fmt.Println(addMsg)
+
+			commitMsg := gitCommit()
+			fmt.Println(commitMsg)
+
+			input := cont()
+			if input == "1" {
+				pushMsg := gitPush()
+				fmt.Println(pushMsg)
+			}
+		} else {
+			fmt.Println("Aborting...")
+		}
+	} else {
+		fmt.Println("No files to commit, everything is upto date.")
+	}
 }
