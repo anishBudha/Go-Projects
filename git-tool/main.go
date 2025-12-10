@@ -19,7 +19,7 @@ type GitStatus struct {
 	DeletedStaged []string
 	DeletedUnstaged []string
 	ModifiedStagedModified []string
-
+	Renamed []string
 }
 
 func getGitStatus() GitStatus {
@@ -74,7 +74,7 @@ func getGitStatus() GitStatus {
 			status.ModifiedStagedModified = append(status.ModifiedStagedModified, filename)
 		} else if strings.HasPrefix(line, "??") {
 			filename := line[3:]
-			status.Unstaged = append(status.Unstaged, filename)
+			status.Untracked = append(status.Untracked, filename)
 		}
 	}
 	return status
@@ -130,35 +130,86 @@ func cont() string {
 }
 
 func main () {
-	
-	branch, untracked := getGitStatus()
-	fmt.Println("Branch:", branch)
-	fmt.Println("length of untracked:", len(untracked))
+	status := getGitStatus()
 
-	if untracked != nil {
-		fmt.Println("Untracked files:")
-		for _, file := range untracked {
-			fmt.Println(file)
-		}
+	fmt.Println("Local Branch:", status.LocalBranch)
+	fmt.Println("Remote Branch:", status.RemoteBranch)
 
-		input := cont()
+	if len(status.Untracked) == 0 &&
+		 len(status.ModifiedStaged) == 0 &&
+		 len(status.ModifiedUnstaged) == 0 &&
+		 len(status.Added) == 0 &&
+		 len(status.AddedThenModified) == 0 &&
+		 len(status.DeletedStaged) == 0 &&
+		 len(status.Renamed) == 0 &&
+		 len(status.ModifiedStagedModified) == 0 {
+				fmt.Println("No files to commit, everything is upto date.")
+		 } else	{
+				if len(status.Untracked) > 0 {
+					fmt.Println("Untracked:")
+					for _, file := range status.Untracked {
+						fmt.Println(" ", file)
+					}
+				}	
+				if len(status.ModifiedStaged) > 0 {
+					fmt.Println("Modified Staged:")
+					for _, file := range status.ModifiedStaged {
+						fmt.Println(" ", file)
+					}
+				}
+				if len(status.ModifiedUnstaged) > 0 {
+					fmt.Println("Modified Unstaged:")
+					for _, file := range status.ModifiedUnstaged {
+						fmt.Println(" ", file)
+					}
+				}
+				if len(status.Added) > 0 {
+					fmt.Println("Added:")
+					for _, file := range status.Added {
+						fmt.Println(" ", file)
+					}
+				}
+				if len(status.AddedThenModified) > 0 {
+					fmt.Println("Added Modified:")
+					for _, file := range status.AddedThenModified {
+						fmt.Println(" ", file)
+					}
+				}
+				if len(status.DeletedStaged) > 0 {
+					fmt.Println("Deleted Staged:")
+					for _, file := range status.DeletedStaged {
+						fmt.Println(" ", file)
+					}
+				}
+				if len(status.DeletedUnstaged) > 0 {
+					fmt.Println("Deleted Unstaged:")
+					for _, file := range status.DeletedUnstaged {
+						fmt.Println(" ", file)
+					}
+				}
+				if len(status.ModifiedStagedModified) > 0 {
+					fmt.Println("Modified Staged Modified:")
+					for _, file := range status.ModifiedStagedModified {
+						fmt.Println(" ", file)
+					}
+				}
+				
+				input := cont()
 
-		if input == "1" {
-			addMsg := gitAddAll()
-			fmt.Println(addMsg)
+				if input == "1" {
+					addMsg := gitAddAll()
+					fmt.Println(addMsg)
 
-			commitMsg := gitCommit()
-			fmt.Println(commitMsg)
+					commitMsg := gitCommit()
+					fmt.Println(commitMsg)
 
-			input := cont()
-			if input == "1" {
-				pushMsg := gitPush()
-				fmt.Println(pushMsg)
-			}
-		} else {
-			fmt.Println("Aborting...")
-		}
-	} else {
-		fmt.Println("No files to commit, everything is upto date.")
+					input := cont()
+					if input == "1" {
+						pushMsg := gitPush()
+						fmt.Println(pushMsg)
+					}
+				} else {
+					fmt.Println("Aborting...")
+				}
 	}
 }
