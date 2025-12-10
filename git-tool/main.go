@@ -6,6 +6,8 @@ import (
 	"strings"
 	"os"
 	"bufio"
+	"math/rand"
+	"time"
 )
 
 type GitStatus struct {
@@ -93,8 +95,15 @@ func gitAddAll() string {
 }
 
 func gitCommit() string {
-	test := `"test"`
-	cmd := exec.Command("git", "commit", "-m", test)
+	rand.Seed(time.Now().UnixNano())
+	fmt.Println("Enter your commit message:")
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	input := scanner.Text()
+	if input == "" {
+		input = fmt.Sprintf("commit %d", rand.Intn(1000))
+	}
+	cmd := exec.Command("git", "commit", "-m", input)
 	output, err := cmd.Output()
 	if err != nil {
 		fmt.Println("error", err)
