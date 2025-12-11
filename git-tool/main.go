@@ -112,7 +112,7 @@ func gitCommit() string {
 		fmt.Println(lines)
 	}
 
-	commitSuccess := "Commited all files successfully"
+	commitSuccess := "Commited all files successfully."
 	return commitSuccess
 }
 
