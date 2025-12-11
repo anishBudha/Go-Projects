@@ -150,6 +150,7 @@ func main () {
 		 len(status.Added) == 0 &&
 		 len(status.AddedThenModified) == 0 &&
 		 len(status.DeletedStaged) == 0 &&
+		 len(status.DeletedUnstaged) == 0 &&
 		 len(status.Renamed) == 0 &&
 		 len(status.ModifiedStagedModified) == 0 {
 				fmt.Println("No files to commit, everything is upto date.")
